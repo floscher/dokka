@@ -6,7 +6,6 @@ export type Page = {
     location: string;
     searchKey: string;
     description: string;
-    disabled: boolean;
 }
 
 export type Option = Page & {
@@ -19,6 +18,7 @@ export type Option = Page & {
 export type IWindow = typeof window & {
     pathToRoot: string
     pages: Page[]
+    navigationPane: Option[]
 }
 
 export type Props = {

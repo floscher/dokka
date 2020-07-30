@@ -2,8 +2,8 @@ package org.jetbrains.dokka.base.renderers.html
 
 import kotlinx.html.*
 import kotlinx.html.stream.createHTML
-import org.jetbrains.dokka.links.DRI
 import org.jetbrains.dokka.DokkaConfiguration.DokkaSourceSet
+import org.jetbrains.dokka.links.DRI
 import org.jetbrains.dokka.pages.PageNode
 import org.jetbrains.dokka.pages.RendererSpecificPage
 import org.jetbrains.dokka.pages.RenderingStrategy
@@ -38,7 +38,7 @@ class NavigationPage(val root: NavigationNode) : RendererSpecificPage {
         }
 }
 
-class NavigationNode(
+data class NavigationNode(
     val name: String,
     val dri: DRI,
     val sourceSets: Set<DokkaSourceSet>,
