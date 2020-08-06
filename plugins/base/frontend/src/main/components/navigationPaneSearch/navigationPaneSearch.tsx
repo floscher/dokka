@@ -34,7 +34,9 @@ export const NavigationPaneSearch = () => {
     }
 
     useEffect(() => {
-        fetch(`${(window as IWindow).pathToRoot}/scripts/navigation-pane.json`)
+        const pathToRoot = (window as IWindow).pathToRoot
+        const url = pathToRoot.endsWith('/') ? `${pathToRoot}scripts/navigation-pane.json` : `${pathToRoot}/scripts/navigation-pane.json`
+        fetch(url)
             .then(response => response.json())
             .then((result) => {
                 setNavigationList(result.map((record: Option) => {
