@@ -3,6 +3,7 @@
 $defaultHeight: 40px;
 
 div#paneSearch {
+
     width: 264px;
     margin: 0 auto;
 
@@ -11,13 +12,22 @@ div#paneSearch {
         border: 1px solid $grey-border;
         box-sizing: border-box;
         border-radius: 4px;
-        padding: 0.5em 1em;
+        padding: 8px 32px 8px 8px !important;
         height: $defaultHeight;
     }
     
     .navigation-pane-search {
         width: 100% !important;
         padding-top: 16px;
+    }
+
+    div.paneSearchInputWrapper {
+        position: relative;
+        span.paneSearchInputClearIcon {
+            position: absolute;
+            top: calc(50% + 2px); //Just to include a border
+            right: 16px;
+        }
     }
 }
 

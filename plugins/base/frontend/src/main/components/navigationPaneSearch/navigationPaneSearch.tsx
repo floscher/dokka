@@ -1,8 +1,9 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import {Select, List} from '@jetbrains/ring-ui';
+import {Select, List } from '@jetbrains/ring-ui';
 import { DokkaFuzzyFilterComponent } from '../search/dokkaFuzzyFilter';
 import { IWindow, Option } from '../search/types';
 import './navigationPaneSearch.scss';
+import ClearIcon from 'react-svg-loader!./clear.svg';
 
 export const NavigationPaneSearch = () => {
     const defaultWidth = 300
@@ -10,6 +11,7 @@ export const NavigationPaneSearch = () => {
     const [navigationList, setNavigationList] = useState<Option[]>([]);
     const [selected, onSelected] = useState<Option | null>(null);
     const [minWidth, setMinWidth] = useState<number>(defaultWidth);
+    const [filterValue, setFilterValue] = useState<string>('')
     
     const onChangeSelected = useCallback(
         (element: Option) => {
@@ -24,6 +26,11 @@ export const NavigationPaneSearch = () => {
             const requiredWidth = Math.max(...filteredRecords.map(e => e.label.length*9), defaultWidth)
             setMinWidth(requiredWidth)
         }
+        setFilterValue(filterValue)
+    }
+
+    const onClearClick = () => {
+        setFilterValue('')
     }
 
     useEffect(() => {
@@ -42,20 +49,23 @@ export const NavigationPaneSearch = () => {
                 setNavigationList([])
             })
     }, [])
+  
 
-    //@ts-ignore
-    return <DokkaFuzzyFilterComponent
-                id="navigation-pane-search"
-                className="navigation-pane-search"
-                inputPlaceholder="Title filter"
-                filter={{fuzzy:true}}
-                type={Select.Type.INPUT_WITHOUT_CONTROLS}
-                clear
-                selected={selected}
-                data={navigationList}
-                popupClassName={"navigation-pane-popup"}
-                onSelect={onChangeSelected}
-                onFilter={onFilter}
-                minWidth={minWidth}
-            />
+    return <div className={"paneSearchInputWrapper"}>
+            <DokkaFuzzyFilterComponent
+                    id="navigation-pane-search"
+                    className="navigation-pane-search"
+                    inputPlaceholder="Title filter"
+                    clear={true}
+                    type={Select.Type.INPUT_WITHOUT_CONTROLS}
+                    filter={{fuzzy:true, value: filterValue}}
+                    selected={selected}
+                    data={navigationList}
+                    popupClassName={"navigation-pane-popup"}
+                    onSelect={onChangeSelected}
+                    onFilter={onFilter}
+                    minWidth={minWidth}
+                />
+                <span className={"paneSearchInputClearIcon"} onClick={onClearClick}><ClearIcon /></span>
+        </div>
 }

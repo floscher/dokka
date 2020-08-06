@@ -39,6 +39,15 @@ const highlightMatchedPhrases = (records: OptionWithSearchResult[]): OptionWithH
 }
 
 export class DokkaFuzzyFilterComponent extends Select {
+    componentDidUpdate(prevProps, prevState) {
+        super.componentDidUpdate(prevProps, prevState)
+        if(this.props.filter && this.state.filterValue != this.props.filter.value){
+            this.setState({
+                filterValue: this.props.filter.value,
+            })
+        }
+    }
+    
     getListItems(rawFilterString: string, _: Option[]) {
         const filterPhrase = (rawFilterString ? rawFilterString : '').trim()
         const matchedRecords = this.props.data
