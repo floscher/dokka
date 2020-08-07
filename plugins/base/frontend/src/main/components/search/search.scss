@@ -15,8 +15,12 @@
 }
 
 .template-wrapper {
+  height: 32px;
   display: grid;
   grid-template-columns: auto auto;
+  span {
+    line-height: 32px;  
+  }
 }
 
 .template-name {
