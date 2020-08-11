@@ -1,3 +1,6 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
+
 subprojects {
     sourceSets {
         create("integrationTest") {
@@ -39,6 +42,13 @@ subprojects {
                 ?: false.toString()
         )
 
+        testLogging {
+            exceptionFormat = TestExceptionFormat.FULL
+            events(TestLogEvent.SKIPPED, TestLogEvent.FAILED)
+            showExceptions = true
+            showCauses = true
+            showStackTraces = true
+        }
     }
 
     tasks.check {

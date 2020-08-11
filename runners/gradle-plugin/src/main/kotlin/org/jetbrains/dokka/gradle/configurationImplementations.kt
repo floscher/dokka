@@ -213,9 +213,9 @@ class GradleSourceLinkDefinitionImpl : SourceLinkDefinition {
     override var lineSuffix: String? = null
 }
 
-class GradleExternalDocumentationLinkImpl : ExternalDocumentationLink {
-    override var url: URL = URL("http://")
-    override var packageListUrl: URL = URL("http://")
+class GradleExternalDocumentationLinkImpl : ExternalDocumentationLink.Builder() {
+    override var url: URL? = null
+    override var packageListUrl: URL? = null
 }
 
 class GradleDokkaModuleDescription : DokkaModuleDescription {

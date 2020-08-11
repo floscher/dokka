@@ -58,13 +58,13 @@ class SearchScriptsCreator(private val locationProvider: JavadocLocationProvider
     }
 
     private fun processModules(input: List<JavadocModulePageNode>): SearchData {
-        val modules = SearchData(moduleRecords = input.map { SearchRecord(l = it.name, url = locationProvider.resolve(it).formatToEndWithHtml()) })
+        val modules = SearchData(moduleRecords = input.map { SearchRecord(l = it.name, url = locationProvider.resolve(it)?.formatToEndWithHtml()) })
         val processablePackages = input.flatMap { it.children.filterIsInstance<JavadocPackagePageNode>() }
         return processPackages(processablePackages, modules)
     }
 
     private fun processPackages(input: List<JavadocPackagePageNode>, accumulator: SearchData): SearchData {
-        val packages = input.map { SearchRecord(l = it.name, url = locationProvider.resolve(it).formatToEndWithHtml()) } + SearchRecord.allPackages
+        val packages = input.map { SearchRecord(l = it.name, url = locationProvider.resolve(it)?.formatToEndWithHtml()) } + SearchRecord.allPackages
         val types = input.flatMap {
             it.children.filterIsInstance<JavadocClasslikePageNode>().map { classlike -> it to classlike }
         }
@@ -80,7 +80,7 @@ class SearchScriptsCreator(private val locationProvider: JavadocLocationProvider
             SearchRecord(
                 p = it.first.name,
                 l = it.second.name,
-                url = locationProvider.resolve(it.second).formatToEndWithHtml()
+                url = locationProvider.resolve(it.second)?.formatToEndWithHtml()
             )
         } + allTypes
         val updated = accumulator.copy(typeRecords = types)

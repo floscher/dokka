@@ -6,8 +6,9 @@ import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.base.renderers.DefaultRenderer
 import org.jetbrains.dokka.base.renderers.PackageListCreator
 import org.jetbrains.dokka.base.renderers.RootCreator
-import org.jetbrains.dokka.base.resolvers.local.DefaultLocationProvider
+import org.jetbrains.dokka.base.resolvers.local.DokkaLocationProvider
 import org.jetbrains.dokka.base.resolvers.local.LocationProviderFactory
+import org.jetbrains.dokka.base.resolvers.shared.RecognizedLinkFormat
 import org.jetbrains.dokka.pages.*
 import org.jetbrains.dokka.plugability.DokkaContext
 import org.jetbrains.dokka.plugability.DokkaPlugin
@@ -39,7 +40,7 @@ class GfmPlugin : DokkaPlugin() {
 
     val packageListCreator by extending {
         (gfmPreprocessors
-                providing { PackageListCreator(it, "gfm", "md") }
+                providing { PackageListCreator(it, RecognizedLinkFormat.DokkaGFM) }
                 order { after(rootCreator) })
     }
 }
@@ -337,9 +338,8 @@ class MarkdownLocationProviderFactory(val context: DokkaContext) : LocationProvi
 class MarkdownLocationProvider(
     pageGraphRoot: RootPageNode,
     dokkaContext: DokkaContext
-) : DefaultLocationProvider(
+) : DokkaLocationProvider(
     pageGraphRoot,
-    dokkaContext
-) {
-    override val extension = ".md"
-}
+    dokkaContext,
+".md"
+)
