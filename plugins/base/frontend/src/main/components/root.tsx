@@ -5,6 +5,7 @@ import RedBox from 'redbox-react';
 import App from "./app";
 import './app/index.scss';
 import { NavigationPaneSearch } from './navigationPaneSearch/navigationPaneSearch';
+import { PageSummary } from './pageSummary/pageSummary';
 
 const appEl = document.getElementById('searchBar');
 const rootEl = document.createElement('div');
@@ -16,12 +17,44 @@ const renderNavigationPane = () => {
   )
 }
 
+const renderOnThisPage = () => {
+  const data = {
+    category: 'functions',
+    entries: [
+      {
+        dri: 'XD',
+        label: 'First'
+      },
+      {
+        dri: 'XD',
+        label: 'Second'
+      },
+      {
+        dri: 'XD',
+        label: 'Third'
+      }
+    ]
+  }
+  console.log('byClass', document.getElementsByClassName)
+  console.log('byQuery', document.querySelectorAll)
+
+  setTimeout(() => {
+    for(const e of document.querySelectorAll('.tabs-section-body > div[data-togglable]')){
+      const category = e.getAttribute('data-togglable')
+      const element = document.createElement('div')
+      render(<PageSummary category={category} entries={data.entries}/>, element)
+      e.appendChild(element)
+    }
+  })
+}
+
 let renderApp = () => {
   render(
       <App/>,
       rootEl
   );
   renderNavigationPane();
+  renderOnThisPage();
 };
 
 // @ts-ignore
