@@ -500,7 +500,8 @@ private class DokkaDescriptorVisitor(
                 underlyingType = underlyingType.toBound().toSourceSetDependent(),
                 visibility = visibility.toDokkaVisibility().toSourceSetDependent(),
                 documentation = resolveDescriptorData(),
-                sourceSets = setOf(sourceSet)
+                sourceSets = setOf(sourceSet),
+                generics = descriptor.declaredTypeParameters.map { it.toTypeParameter() }
             )
         }
 
