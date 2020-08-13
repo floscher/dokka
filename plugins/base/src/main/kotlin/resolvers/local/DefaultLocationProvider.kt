@@ -31,7 +31,7 @@ open class DefaultLocationProvider(
     protected val anchorsIndex = pageGraphRoot.withDescendants().filterIsInstance<ContentPage>()
         .flatMap { page ->
             page.content.withDescendants()
-                .filter { it.extra[SymbolAnchorHint] != null }
+                .filter { it.extra[SymbolAnchorHint.SymbolAnchorHintKey] != null }
                 .mapNotNull { it.dci.dri.singleOrNull() }
                 .distinct()
                 .map { it to page }

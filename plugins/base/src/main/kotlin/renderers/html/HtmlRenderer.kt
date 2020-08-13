@@ -10,6 +10,8 @@ import org.jetbrains.dokka.Platform
 import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.base.renderers.DefaultRenderer
 import org.jetbrains.dokka.base.renderers.TabSortingStrategy
+import org.jetbrains.dokka.base.resolvers.anchors.SymbolAnchorHint
+import org.jetbrains.dokka.base.transformers.pages.sourcelinks.hasTabbedContent
 import org.jetbrains.dokka.links.DRI
 import org.jetbrains.dokka.model.properties.PropertyContainer
 import org.jetbrains.dokka.model.withDescendants
@@ -92,6 +94,7 @@ open class HtmlRenderer(
                 span("breakable-word") { childrenCallback() }
             }
             node.hasStyle(TextStyle.Span) -> span() { childrenCallback() }
+            node.anchorLabel != null -> buildAnchor(node.anchor, node.anchorLabel!!){ childrenCallback() }
             node.dci.kind == ContentKind.Symbol -> div("symbol $additionalClasses") { childrenCallback() }
             node.dci.kind == ContentKind.BriefComment -> div("brief $additionalClasses") { childrenCallback() }
             node.dci.kind == ContentKind.Cover -> div("cover $additionalClasses") {
@@ -363,44 +366,42 @@ open class HtmlRenderer(
             .filter { sourceSetRestriction == null || it.sourceSets.any { s -> s in sourceSetRestriction } }
             .takeIf { it.isNotEmpty() }
             ?.let {
-                val anchorName = node.dci.dri.first().toString()
-                withAnchor(anchorName) {
-                    div(classes = "table-row") {
-                        if (!style.contains(MultimoduleTable)) {
-                            attributes["data-filterable-current"] = node.sourceSets.joinToString(" ") {
-                                it.sourceSetID.toString()
-                            }
-                            attributes["data-filterable-set"] = node.sourceSets.joinToString(" ") {
-                                it.sourceSetID.toString()
-                            }
+                anchorFromNode(node)
+                div(classes = "table-row") {
+                    if (!style.contains(MultimoduleTable)) {
+                        attributes["data-filterable-current"] = node.sourceSets.joinToString(" ") {
+                            it.sourceSetID.toString()
                         }
-
-                        it.filterIsInstance<ContentLink>().takeIf { it.isNotEmpty() }?.let {
-                            div("main-subrow " + node.style.joinToString(" ")) {
-                                it.filter { sourceSetRestriction == null || it.sourceSets.any { s -> s in sourceSetRestriction } }
-                                    .forEach {
-                                        span {
-                                            it.build(this, pageContext, sourceSetRestriction)
-                                            buildAnchor(anchorName)
-                                        }
-                                        if (ContentKind.shouldBePlatformTagged(node.dci.kind) && (node.sourceSets.size == 1))
-                                            createPlatformTags(node)
-                                    }
-                            }
+                        attributes["data-filterable-set"] = node.sourceSets.joinToString(" ") {
+                            it.sourceSetID.toString()
                         }
+                    }
 
-                        it.filter { it !is ContentLink }.takeIf { it.isNotEmpty() }?.let {
-                            div("platform-dependent-row keyValue") {
-                                val title = it.filter { it.style.contains(ContentStyle.RowTitle) }
-                                div {
-                                    title.forEach {
+                    it.filterIsInstance<ContentLink>().takeIf { it.isNotEmpty() }?.let {
+                        div("main-subrow " + node.style.joinToString(" ")) {
+                            it.filter { sourceSetRestriction == null || it.sourceSets.any { s -> s in sourceSetRestriction } }
+                                .forEach {
+                                    span {
                                         it.build(this, pageContext, sourceSetRestriction)
+                                        buildAnchorCopyButton(it.anchor)
                                     }
+                                    if (ContentKind.shouldBePlatformTagged(node.dci.kind) && (node.sourceSets.size == 1))
+                                        createPlatformTags(node)
                                 }
-                                div("title") {
-                                    (it - title).forEach {
-                                        it.build(this, pageContext, sourceSetRestriction)
-                                    }
+                        }
+                    }
+
+                    it.filter { it !is ContentLink }.takeIf { it.isNotEmpty() }?.let {
+                        div("platform-dependent-row keyValue") {
+                            val title = it.filter { it.style.contains(ContentStyle.RowTitle) }
+                            div {
+                                title.forEach {
+                                    it.build(this, pageContext, sourceSetRestriction)
+                                }
+                            }
+                            div("title") {
+                                (it - title).forEach {
+                                    it.build(this, pageContext, sourceSetRestriction)
                                 }
                             }
                         }
@@ -485,23 +486,30 @@ open class HtmlRenderer(
 
 
     override fun FlowContent.buildHeader(level: Int, node: ContentHeader, content: FlowContent.() -> Unit) {
-        val anchor = node.extra[SimpleAttr.SimpleAttrKey("anchor")]?.extraValue
         val classes = node.style.joinToString { it.toString() }.toLowerCase()
         when (level) {
-            1 -> h1(classes = classes) { withAnchor(anchor, content) }
-            2 -> h2(classes = classes) { withAnchor(anchor, content) }
-            3 -> h3(classes = classes) { withAnchor(anchor, content) }
-            4 -> h4(classes = classes) { withAnchor(anchor, content) }
-            5 -> h5(classes = classes) { withAnchor(anchor, content) }
-            else -> h6(classes = classes) { withAnchor(anchor, content) }
+            1 -> h1(classes = classes, content)
+            2 -> h2(classes = classes, content)
+            3 -> h3(classes = classes, content)
+            4 -> h4(classes = classes, content)
+            5 -> h5(classes = classes, content)
+            else -> h6(classes = classes, content)
         }
     }
 
-    private fun FlowContent.withAnchor(anchorName: String?, content: FlowContent.() -> Unit) {
+    private fun FlowContent.buildAnchor(anchor: String, anchorLabel: String, content: FlowContent.() -> Unit) {
         a {
-            anchorName?.let { attributes["data-name"] = it }
+            attributes["data-name"] = anchor
+            attributes["anchor-label"] = anchorLabel
         }
         content()
+    }
+
+    private fun FlowContent.buildAnchor(anchor: String, anchorLabel: String) =
+        buildAnchor(anchor, anchorLabel){}
+
+    private fun FlowContent.anchorFromNode(node: ContentNode) {
+        node.anchorLabel?.let { label -> buildAnchor(node.anchor, label) }
     }
 
 
@@ -519,7 +527,7 @@ open class HtmlRenderer(
             text(to.name)
         }
 
-    private fun FlowContent.buildAnchor(pointingTo: String) {
+    private fun FlowContent.buildAnchorCopyButton(pointingTo: String) {
         span(classes = "anchor-wrapper") {
             span(classes = "anchor-icon") {
                 attributes["pointing-to"] = pointingTo
@@ -752,3 +760,9 @@ private val PageNode.isNavigable: Boolean
     get() = this !is RendererSpecificPage || strategy != RenderingStrategy.DoNothing
 
 fun PropertyContainer<ContentNode>.extraHtmlAttributes() = allOfType<SimpleAttr>()
+
+val ContentNode.anchorLabel: String?
+    get() = extra[SymbolAnchorHint.SymbolAnchorHintKey]?.anchorName
+
+val ContentNode.anchor: String
+    get() = dci.dri.first().toString()
