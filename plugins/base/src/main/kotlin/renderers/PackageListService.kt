@@ -22,7 +22,9 @@ class PackageListService(val context: DokkaContext) {
         fun visit(node: PageNode, parentDris: Set<DRI>) {
 
             if (node is PackagePageNode) {
-                packages.add(node.name)
+                node.name
+                    .takeUnless { name -> name.startsWith("[") && name.endsWith("]") } // Do not include the package name for declarations without one
+                    ?.let { packages.add(it) }
             }
 
             val contentPage = node.safeAs<ContentPage>()

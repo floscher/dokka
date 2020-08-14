@@ -12,6 +12,8 @@ open class DefaultExternalLocationProvider(
 ) : ExternalLocationProvider {
     override fun resolve(dri: DRI): String? { // TODO: classes without packages?
         val docURL = externalDocumentation.documentationURL.toString().removeSuffix("/") + "/"
+        externalDocumentation.packageList.locations[dri.toString()]?.let { path -> return "$docURL$path" }
+
         val classNamesChecked = dri.classNames ?: return "$docURL${dri.packageName ?: ""}/index$extension"
         val classLink = (listOfNotNull(dri.packageName) + classNamesChecked.split('.'))
             .joinToString("/", transform = ::identifierToFilename)

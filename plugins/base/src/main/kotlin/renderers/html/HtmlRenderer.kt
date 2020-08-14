@@ -550,7 +550,7 @@ open class HtmlRenderer(
         from: PageNode? = null,
         block: FlowContent.() -> Unit
     ) = locationProvider.resolve(to, platforms.toSet(), from)?.let { buildLink(it, block) }
-        ?: run { context.logger.error("Cannot resolve path for $to"); block() }
+        ?: run { context.logger.error("Cannot resolve path for `$to` from `$from`"); block() }
 
     override fun buildError(node: ContentNode) {
         context.logger.error("Unknown ContentNode type: $node")
@@ -634,7 +634,6 @@ open class HtmlRenderer(
                     ?.let {
                         locationProvider.resolve(page)
                             ?.let { path -> pageList.put(it, Pair(textNodes ?: page.name, path)) }
-                            ?: context.logger.error("Cannot resolve path for ${page.dri}")
                     }
 
             }
@@ -653,7 +652,7 @@ open class HtmlRenderer(
 
     private fun generatePagesList() =
         pageList.entries
-            .filter { !it.key.isNullOrEmpty() }
+            .filterNot { it.key.isBlank() }
             .groupBy { it.key.substringAfterLast(".") }
             .entries
             .flatMapIndexed { topLevelIndex, entry ->
