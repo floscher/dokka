@@ -5,6 +5,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.dokka.DokkaConfiguration.DokkaSourceSet
+import org.jetbrains.dokka.DokkaException
 import org.jetbrains.dokka.base.DokkaBase
 import org.jetbrains.dokka.base.resolvers.local.LocationProvider
 import org.jetbrains.dokka.pages.*
@@ -157,7 +158,10 @@ abstract class DefaultRenderer<T>(
     }
 
     open suspend fun renderPage(page: PageNode) {
-        val path by lazy { locationProvider.resolve(page, skipExtension = true)!! }
+        val path by lazy {
+            locationProvider.resolve(page, skipExtension = true)
+                ?: throw DokkaException("Cannot resolve path for ${page.name}")
+        }
         when (page) {
             is ContentPage -> outputWriter.write(path, buildPage(page) { c, p -> buildPageContent(c, p) }, ".html")
             is RendererSpecificPage -> when (val strategy = page.strategy) {
