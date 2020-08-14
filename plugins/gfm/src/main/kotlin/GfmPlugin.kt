@@ -361,8 +361,4 @@ class MarkdownLocationProviderFactory(val context: DokkaContext) : LocationProvi
 class MarkdownLocationProvider(
     pageGraphRoot: RootPageNode,
     dokkaContext: DokkaContext
-) : DokkaLocationProvider(
-    pageGraphRoot,
-    dokkaContext,
-    ".md"
-)
+) : DokkaLocationProvider(pageGraphRoot, dokkaContext, ".md")
